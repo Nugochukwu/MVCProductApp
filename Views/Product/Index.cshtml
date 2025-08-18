@@ -1,0 +1,23 @@
+﻿@model IEnumerable<MVCProductApp.Models.Product>
+
+<h2>Product List</h2>
+<a asp-action="Create">Add New Product</a>
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model)
+    {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Price</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
+    }
+</table>
