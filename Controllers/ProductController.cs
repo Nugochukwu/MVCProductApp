@@ -31,6 +31,7 @@ namespace MVCProductApp.Controllers
 
         // Post Product/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Product product) 
         {
             if (ModelState.IsValid)
@@ -43,6 +44,7 @@ namespace MVCProductApp.Controllers
         }
         
         //GET Product/Edit
+
         public IActionResult Edit(int id)
         {
             var product = _products.FirstOrDefault(p => p.ID == id);
@@ -51,8 +53,14 @@ namespace MVCProductApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(product);
+            }
+
             var foundProduct = _products.FirstOrDefault(p => p.ID == product.ID);
             if (foundProduct == null) return NotFound();
 
@@ -60,12 +68,14 @@ namespace MVCProductApp.Controllers
             foundProduct.Price = product.Price;
             foundProduct.Description = product.Description;
 
+            TempData["Message"] = "Product updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
         //GET Product/Delete
         public IActionResult Delete(int id)
         {
+            
             var product = _products.FirstOrDefault(p => p.ID == id);
             if (product != null) _products.Remove(product);
             return RedirectToAction(nameof(Index));
