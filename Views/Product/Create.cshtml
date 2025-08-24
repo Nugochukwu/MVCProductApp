@@ -3,6 +3,7 @@
 
 <h2>Add Product</h2>
 <form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
     <label>Name</label>
     <input asp-for="Name" />
     <label>Price</label>
