@@ -1,30 +1,45 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MVCProductApp.Models;
-using System.Collections.Generic;
+using MVCProductApp.Models;
+using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Threading.Tasks;
+
+
 
 namespace MVCProductApp.Controllers
 {
     public class ProductController : Controller
     {
-        private static List<Product> _products = new List<Product>();
-        private static int _nextId = 1;
+        //Getting the DB context from  the class file.
+        private readonly ApplicationDbContext _context;
 
-        public IActionResult Index()
+        //??
+        public ProductController(ApplicationDbContext context)
         {
-            return View(_products);
+            //initializing the context variable.
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var products = await _context.Products.ToListAsync();
+            return View(products);
         }
 
        
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var product = _products.FirstOrDefault(p => p.ID == id);
-            if (_products == null) return NotFound();
+            //Checking the database/context for the Product with the specified field id.
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+            
             return View(product);
         }
 
         // Get Product/Create
-        public IActionResult create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -32,12 +47,13 @@ namespace MVCProductApp.Controllers
         // Post Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Product product) 
+        public async Task <IActionResult> Create(Product product) 
         {
             if (ModelState.IsValid)
             {
-                product.ID = _nextId++;
-                _products.Add(product);
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -45,39 +61,49 @@ namespace MVCProductApp.Controllers
         
         //GET Product/Edit
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var product = _products.FirstOrDefault(p => p.ID == id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
             return View(product);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Product product)
+        public async Task<IActionResult> Edit(Product product)
         {
             if (!ModelState.IsValid)
             {
                 return View(product);
             }
 
-            var foundProduct = _products.FirstOrDefault(p => p.ID == product.ID);
-            if (foundProduct == null) return NotFound();
-
-            foundProduct.Name = product.Name;
-            foundProduct.Price = product.Price;
-            foundProduct.Description = product.Description;
-
-            TempData["Message"] = "Product updated successfully!";
+            try
+            {
+                _context.Update(product);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Product updated successfully!";
+            }
+            catch (DbUpdateConcurrencyException) 
+            { 
+                if(!_context.Products.Any(p => p.ID == product.ID))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
             return RedirectToAction(nameof(Index));
         }
 
         //GET Product/Delete
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             
-            var product = _products.FirstOrDefault(p => p.ID == id);
-            if (product != null) _products.Remove(product);
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
     }
