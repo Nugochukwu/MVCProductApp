@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MVCProductApp.Models;
-using MVCProductApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace MVCProductApp.Controllers
 {
+    [Authorize]
     public class ProductController : Controller
     {
         //Getting the DB context from  the class file.
