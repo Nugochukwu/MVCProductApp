@@ -18,7 +18,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
-
+// MVC + API support
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 
 
 var app = builder.Build();
@@ -44,6 +47,11 @@ app.MapControllerRoute(
     pattern: "{controller=Product}/{action=Index}/{id?}");
 
 //Identity Ui
-app.MapRazorPages(); 
+app.MapRazorPages();
+
+// API routes
+app.MapControllers(); 
+
+
 
 app.Run();
